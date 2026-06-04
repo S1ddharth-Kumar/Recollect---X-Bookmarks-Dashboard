@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-8">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="eyebrow">Search workspace</p>
+        <h2 class="mt-2 text-4xl text-stone-50">Find saved tweets in seconds</h2>
+      </div>
+      <p class="max-w-xl text-sm text-stone-400">
+        Use `hybrid` for the default experience, `keyword` for exact terms, and `semantic` when you remember the idea but not the words.
+      </p>
+    </div>
+
+    <form
+      class="mt-8 grid gap-4 lg:grid-cols-[2fr_180px_180px_220px]"
+      hx-get="/search"
+      hx-target="#results"
+      hx-push-url="true"
+    >
+      <input class="field" type="search" name="q" value="{{ query }}" placeholder="AI agents, startup ideas, system design..." />
+      <select class="field" name="mode">
+        <option value="hybrid" {% if mode == "hybrid" %}selected{% endif %}>Hybrid</option>
+        <option value="keyword" {% if mode == "keyword" %}selected{% endif %}>Keyword</option>
+        <option value="semantic" {% if mode == "semantic" %}selected{% endif %}>Semantic</option>
+      </select>
+      <select class="field" name="category">
+        <option value="">All categories</option>
+        {% for category, _ in category_counts %}
+          <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+      </select>
+      <select class="field" name="collection_id">
+        <option value="">All collections</option>
+        {% for collection in collections %}
+          <option value="{{ collection.collection_id }}" {% if selected_collection_id == collection.collection_id %}selected{% endif %}>{{ collection.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </section>
+
+  <section id="results" class="mt-8">
+    {% include "partials/bookmark_list.html" %}
+  </section>
+{% endblock %}
+

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "twitter-bookmarks-organizer"
+version = "0.1.0"
+description = "Local-first Twitter/X bookmarks organizer with sync, semantic search, and a FastAPI UI."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "apscheduler>=3.11.0",
+  "fastapi>=0.115.0",
+  "jinja2>=3.1.6",
+  "playwright>=1.55.0",
+  "python-multipart>=0.0.20",
+  "uvicorn[standard]>=0.35.0",
+]
+
+[project.optional-dependencies]
+semantic = [
+  "numpy>=2.3.0",
+  "sentence-transformers>=4.1.0",
+  "faiss-cpu>=1.12.0; platform_system != 'Windows'",
+]
+
+[dependency-groups]
+dev = [
+  "httpx>=0.28.0",
+  "pytest>=8.4.0",
+  "ruff>=0.11.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["bookmarks_organizer"]

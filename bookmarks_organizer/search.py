@@ -56,36 +56,51 @@ class SearchService:
         limit: int = 20,
         category: str | None = None,
         collection_id: int | None = None,
+        media: str = "all",
+        sort: str = "relevance",
     ) -> list[SearchResult]:
         normalized_query = query.strip()
         if not normalized_query:
             return [
                 SearchResult(tweet=tweet, score=1.0, source="recent")
-                for tweet in self.db.list_recent_bookmarks(limit=limit)
+                for tweet in self.db.list_bookmarks(
+                    limit=limit,
+                    category=category,
+                    media=media,
+                    sort="newest" if sort == "relevance" else sort,
+                )
             ]
 
         keyword_results: dict[str, SearchResult] = {}
         if mode in {"keyword", "hybrid"}:
             for tweet, score in self.db.search_keyword(
-                normalized_query, limit=limit * 2, category=category, collection_id=collection_id
+                normalized_query,
+                limit=limit * 3,
+                category=category,
+                collection_id=collection_id,
+                media=media,
             ):
                 keyword_results[tweet.tweet_id] = SearchResult(tweet=tweet, score=score, source="keyword")
 
         semantic_results: dict[str, SearchResult] = {}
         if mode in {"semantic", "hybrid"}:
             query_vector = self.embedding_provider.encode(normalized_query)
-            for tweet_id, score in self.semantic_index.search(query_vector, limit=limit * 3):
+            for tweet_id, score in self.semantic_index.search(query_vector, limit=limit * 5):
                 tweet = self.db.get_tweet(tweet_id)
                 if tweet is None:
                     continue
                 if category and tweet.category != category:
                     continue
+                if not self._matches_media(tweet, media):
+                    continue
                 semantic_results[tweet_id] = SearchResult(tweet=tweet, score=score, source="semantic")
 
         if mode == "keyword":
-            return list(keyword_results.values())[:limit]
+            results = list(keyword_results.values())
+            return self._sort_results(results, sort)[:limit]
         if mode == "semantic":
-            return sorted(semantic_results.values(), key=lambda item: item.score, reverse=True)[:limit]
+            results = sorted(semantic_results.values(), key=lambda item: item.score, reverse=True)
+            return self._sort_results(results, sort)[:limit]
 
         combined: dict[str, SearchResult] = {}
         for tweet_id, result in semantic_results.items():
@@ -102,4 +117,34 @@ class SearchService:
             existing.score += result.score * 0.35
             existing.source = "hybrid"
         ranked = sorted(combined.values(), key=lambda item: item.score, reverse=True)
-        return ranked[:limit]
+        return self._sort_results(ranked, sort)[:limit]
+
+    def _matches_media(self, tweet: TweetRecord, media: str) -> bool:
+        has_images = bool(tweet.image_urls)
+        has_video = bool(tweet.video_urls or tweet.video_poster_urls)
+        if media == "images":
+            return has_images
+        if media == "video":
+            return has_video
+        if media == "text":
+            return not has_images and not has_video
+        return True
+
+    def _sort_results(self, results: list[SearchResult], sort: str) -> list[SearchResult]:
+        def sort_timestamp(item: SearchResult) -> float:
+            value = item.tweet.bookmarked_at or item.tweet.created_at
+            return value.timestamp() if value is not None else 0.0
+
+        if sort == "oldest":
+            return sorted(results, key=sort_timestamp)
+        if sort == "author":
+            return sorted(
+                results,
+                key=lambda item: (
+                    item.tweet.author.lower(),
+                    -sort_timestamp(item),
+                ),
+            )
+        if sort == "newest":
+            return sorted(results, key=sort_timestamp, reverse=True)
+        return results

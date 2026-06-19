@@ -206,16 +206,44 @@ class Database:
             return self._row_to_tweet(row)
 
     def list_recent_bookmarks(self, limit: int = 25) -> list[TweetRecord]:
+        return self.list_bookmarks(limit=limit, sort="newest")
+
+    def list_bookmarks(
+        self,
+        *,
+        limit: int = 25,
+        offset: int = 0,
+        category: str | None = None,
+        media: str = "all",
+        sort: str = "newest",
+    ) -> list[TweetRecord]:
+        where_clause, params = self._build_bookmark_filters(category=category, media=media)
+        order_clause = self._build_sort_clause(sort)
         with self.connect() as conn:
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM tweets
-                ORDER BY COALESCE(bookmarked_at, inserted_at) DESC
-                LIMIT ?
+                {where_clause}
+                ORDER BY {order_clause}
+                LIMIT ? OFFSET ?
                 """,
-                (limit,),
+                (*params, limit, offset),
             ).fetchall()
             return [self._row_to_tweet(row) for row in rows]
+
+    def count_bookmarks(
+        self,
+        *,
+        category: str | None = None,
+        media: str = "all",
+    ) -> int:
+        where_clause, params = self._build_bookmark_filters(category=category, media=media)
+        with self.connect() as conn:
+            row = conn.execute(
+                f"SELECT COUNT(*) AS count FROM tweets {where_clause}",
+                params,
+            ).fetchone()
+            return int(row["count"])
 
     def search_keyword(
         self,
@@ -223,6 +251,7 @@ class Database:
         limit: int = 25,
         category: str | None = None,
         collection_id: int | None = None,
+        media: str = "all",
     ) -> list[tuple[TweetRecord, float]]:
         sql = """
             SELECT t.*, -bm25(bookmark_fts) AS score
@@ -234,6 +263,9 @@ class Database:
         if category:
             clauses.append("t.category = ?")
             params.append(category)
+        media_clause = self._build_media_clause("t", media)
+        if media_clause:
+            clauses.append(media_clause)
         if collection_id is not None:
             sql += " JOIN collection_items ci ON ci.tweet_id = t.tweet_id "
             clauses.append("ci.collection_id = ?")
@@ -365,6 +397,52 @@ class Database:
                 (collection_id, limit),
             ).fetchall()
             return [self._row_to_tweet(row) for row in rows]
+
+    def _build_bookmark_filters(
+        self,
+        *,
+        category: str | None,
+        media: str,
+        table_alias: str | None = None,
+    ) -> tuple[str, list[object]]:
+        alias = f"{table_alias}." if table_alias else ""
+        clauses: list[str] = []
+        params: list[object] = []
+        if category:
+            clauses.append(f"{alias}category = ?")
+            params.append(category)
+        media_clause = self._build_media_clause(table_alias, media)
+        if media_clause:
+            clauses.append(media_clause)
+        if not clauses:
+            return "", params
+        return "WHERE " + " AND ".join(clauses), params
+
+    def _build_media_clause(self, table_alias: str | None, media: str) -> str:
+        alias = f"{table_alias}." if table_alias else ""
+        image_count = (
+            f"json_array_length(COALESCE(json_extract({alias}metadata_json, '$.image_urls'), json('[]')))"
+        )
+        video_count = (
+            f"json_array_length(COALESCE(json_extract({alias}metadata_json, '$.video_urls'), json('[]')))"
+        )
+        poster_count = (
+            f"json_array_length(COALESCE(json_extract({alias}metadata_json, '$.video_poster_urls'), json('[]')))"
+        )
+        if media == "images":
+            return f"{image_count} > 0"
+        if media == "video":
+            return f"({video_count} > 0 OR {poster_count} > 0)"
+        if media == "text":
+            return f"({image_count} = 0 AND {video_count} = 0 AND {poster_count} = 0)"
+        return ""
+
+    def _build_sort_clause(self, sort: str) -> str:
+        if sort == "oldest":
+            return "COALESCE(bookmarked_at, inserted_at) ASC, created_at ASC"
+        if sort == "author":
+            return "LOWER(author) ASC, COALESCE(bookmarked_at, inserted_at) DESC"
+        return "COALESCE(bookmarked_at, inserted_at) DESC, created_at DESC"
 
     def _row_to_tweet(self, row: sqlite3.Row) -> TweetRecord:
         metadata = json.loads(row["metadata_json"])

@@ -1,0 +1,50 @@
+<div class="bookmark-grid">
+  {% for card in cards %}
+    <article class="bookmark-card">
+      {% if card.preview_image %}
+        <img class="media-card media-card-sm mb-4" src="{{ card.preview_image }}" alt="Bookmark preview image" loading="lazy" />
+      {% endif %}
+
+      <div class="bookmark-card-head">
+        <div>
+          <p class="bookmark-author">{{ card.author }}</p>
+          <p class="bookmark-handle">{{ card.handle }}</p>
+        </div>
+        <span class="tag">{{ card.category }}</span>
+      </div>
+
+      <p class="bookmark-date">{{ card.saved_at }}</p>
+      <p class="tweet-text">{{ card.text }}</p>
+
+      <div class="bookmark-tags">
+        {% for tag in card.tags %}
+          <span class="tag tag-subtle">#{{ tag }}</span>
+        {% endfor %}
+        {% if card.media_label %}
+          <span class="tag tag-subtle">{{ card.media_label }}</span>
+        {% endif %}
+        {% if card.source and card.source != "recent" %}
+          <span class="tag tag-soft">{{ card.source }}</span>
+        {% endif %}
+        {% if card.score %}
+          <span class="tag tag-soft">{{ card.score }}</span>
+        {% endif %}
+      </div>
+
+      <div class="bookmark-actions mt-auto pt-4 flex items-center justify-between border-t border-[rgba(35,31,32,0.1)]">
+        <a class="text-link" href="/bookmarks/{{ card.tweet_id }}">Inspect Entry</a>
+        <a class="text-link" href="{{ card.url }}" target="_blank" rel="noreferrer">Open on X</a>
+      </div>
+    </article>
+  {% else %}
+    <article class="bookmark-card text-center py-10">
+      <p class="tweet-text text-lg italic text-slate-500">
+        {% if query %}
+          No catalog records matched this search. Adjust your filters or query.
+        {% else %}
+          The archive is empty. Run a sync or import records to begin your exploration.
+        {% endif %}
+      </p>
+    </article>
+  {% endfor %}
+</div>

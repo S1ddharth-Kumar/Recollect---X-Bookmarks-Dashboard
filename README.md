@@ -1,70 +1,98 @@
-# Twitter/X Bookmarks Organizer
+# 🏛️ Accidentally Bookmarked
 
-A local-first MVP for turning Twitter/X bookmarks into a searchable personal knowledge base.
+An elegant, local-first personal knowledge base and search database for your Twitter/X bookmarks. Inspired by the meticulous symmetry, warm color palettes, and nostalgic typography of the **Accidentally Wes Anderson (AWA)** aesthetic.
 
-## What it includes
+---
 
-- Incremental bookmark sync with Playwright and a persistent browser profile
-- SQLite storage with FTS5 keyword search
-- Semantic search with a resilient fallback pipeline
-- Auto-categorization and tag extraction
-- FastAPI + Jinja + HTMX dashboard and search UI
-- Weekly scheduling plus a manual sync action
-- Manual bookmark import from your regular browser session
+## 📸 Preview Gallery
 
-## Why `uv`
+*Here is a preview of the curated database layout. Place your screenshots in the `images` directory to display them here:*
 
-This project is set up for `uv` instead of `pip` so dependency resolution is cleaner and easier to recover when Python packages shift across versions or compliance requirements.
+<!-- PLACEHOLDER FOR MAIN DASHBOARD SCREENSHOT -->
+### Main Archive Dashboard
+![Main Archive Dashboard Preview](./images/dashboard_preview.png)
 
-## Quick start
+<!-- PLACEHOLDER FOR SEARCH & RESULTS SCREENSHOT -->
+### Symmetrical Catalog Search
+![Catalog Search & Filters Preview](./images/search_preview.png)
 
+<!-- PLACEHOLDER FOR BOOKMARK DETAIL VIEW SCREENSHOT -->
+### Polaroid Entry Inspection
+![Bookmark Detail & Related Records Preview](./images/detail_preview.png)
+
+---
+
+## ✨ Features
+
+- **🎬 Wes Anderson UI/UX Theme**: Symmetrical visual layouts, warm sand/cream paper background (`#f8f3e4`), retro charcoal borders (`#231f20`), and vibrant brand red (`#ee3024`) accents.
+- **🖼️ Polaroid-style Bookmark Cards**: Cards styled like vintage Polaroid photographs, complete with typewriter tags, metadata stamps, and flat offset drop shadows.
+- **🔍 Hybrid & Semantic Search**: Blends keyword-based FTS5 SQLite query matching with local cosine-similarity embeddings, falling back gracefully if hardware-specific packages (like FAISS on Windows) are missing.
+- **🔄 Incremental Sync**: Fully automated bookmark harvesting via Playwright with a persistent, secure local browser profile.
+- **🏷️ Automated Categorization**: Leverages local pipelines to parse, extract keywords, and auto-tag bookmarks.
+- **📦 Custom Collections**: Group and catalog your entries into distinct thematic binders.
+
+---
+
+## 🚀 Quick Start
+
+Ensure you have [`uv`](https://github.com/astral-sh/uv) installed on your system.
+
+### 1. Initialize the Environment
+Install all project dependencies and compile requirements:
 ```powershell
 uv sync --group dev
+```
+
+### 2. Install Playwright Dependencies
+```powershell
 uv run playwright install chromium
+```
+
+### 3. Seed Demo Archive (Optional)
+Populate your database with sample catalog entries to preview the theme immediately:
+```powershell
 uv run python scripts/seed_demo.py
+```
+
+### 4. Boot the Database Server
+Launch the development server:
+```powershell
 uv run uvicorn bookmarks_organizer.main:app --reload
 ```
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+---
 
-## Optional semantic stack
+## 📥 Syncing Your Real Bookmarks
 
-The app works out of the box with a deterministic local hashing embedder.
-
-If you want transformer embeddings:
-
-```powershell
-uv sync --group dev --extra semantic
-```
-
-On Windows, FAISS may not be available for your Python version. The app automatically falls back to an in-process cosine-similarity index when that happens.
-
-## Running a real sync
-
+To sync your actual X bookmarks, run the sync helper:
 ```powershell
 uv run python scripts/sync_once.py
 ```
+*Note: A secure Playwright browser instance will launch under `data/browser-profile`. Log in to your X session on the first run, and future runs will fetch your bookmarks incrementally in the background.*
 
-The sync service uses a persistent browser profile under `data/browser-profile`. On the first run, sign in to X in the Playwright window if needed, then let the sync continue.
+---
 
-## Manual import without Playwright
+## 📂 Project Architecture
 
-If browser automation keeps failing, use your normal logged-in browser instead.
-
-1. Open `https://x.com/i/bookmarks`
-2. Scroll until the bookmarks you want are visible
-3. Paste the snippet from [scripts/export_bookmarks_console.js](C:/Users/salti/OneDrive/Documents/bookmarks-project/scripts/export_bookmarks_console.js) into the browser DevTools console
-4. The export includes tweet text plus any visible images and video previews that are present in the page DOM
-5. Upload the downloaded JSON from the dashboard, or import it from the CLI:
-
-```powershell
-uv run python scripts/import_bookmarks.py path\to\x-bookmarks-export.json
+```text
+├── bookmarks_organizer/   # Main FastAPI web package & logic
+│   ├── config.py          # App configuration
+│   ├── db.py              # SQLite & Schema layer
+│   ├── embeddings.py      # Embedding pipelines
+│   └── search.py          # Search service (hybrid & semantic)
+├── templates/             # Server-rendered HTML (Jinja + HTMX)
+│   ├── base.html          # Symmetrical page structure
+│   ├── dashboard.html     # Symmetrical main archive view
+│   └── partials/          # Bookmark card and listing modules
+├── static/
+│   └── style.css          # Customized AWA CSS styles & variables
+├── scripts/               # Backup CLI utilities & manual imports
+└── tests/                 # System test suite
 ```
 
-## Project layout
+---
 
-- `bookmarks_organizer/` application package
-- `templates/` server-rendered UI
-- `static/` CSS
-- `scripts/` seed and sync helpers
-- `tests/` unit tests
+## 📜 License
+
+This project is licensed under the MIT License. Peruse and build upon it as you wish!

@@ -74,6 +74,14 @@ A Playwright browser window will open. Log in to X on the first run — subseque
 
 ---
 
+## Screenshots
+
+| Dashboard | Search | Bookmark Detail |
+|:---:|:---:|:---:|
+| ![Dashboard](images/dashboard_preview.png) | ![Search](images/search_preview.png) | ![Detail](images/detail_preview.png) |
+
+---
+
 ## License
 
 MIT

@@ -1,5 +1,5 @@
 <div class="bookmark-grid">
-  {% for card in cards %}
+  {% for card in (cards if cards is defined else recent_bookmarks) %}
     <article class="bookmark-card">
       {% if card.preview_image %}
         <img class="media-card media-card-sm mb-4" src="{{ card.preview_image }}" alt="Bookmark preview image" loading="lazy" />

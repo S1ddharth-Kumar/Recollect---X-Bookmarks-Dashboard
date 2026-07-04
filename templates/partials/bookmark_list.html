@@ -1,46 +1,37 @@
-<div class="section-heading mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between border-b border-[#231f20] pb-4">
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem; border-bottom:1px solid var(--border); padding-bottom:1rem; margin-bottom:1.5rem;">
   <div>
-    <p class="eyebrow">{% if query %}Catalog search results{% else %}Archive Records{% endif %}</p>
-    <h3 class="section-title text-2xl uppercase tracking-wider mt-1">
+    <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:0.3rem;">
+      {% if query %}Search results{% else %}All bookmarks{% endif %}
+    </p>
+    <p style="font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--text); font-weight:600;">
       {% if showing_from and showing_to %}
-        Showing Entries {{ showing_from }}-{{ showing_to }}
-        {% if total_count is not none %}
-          of {{ total_count }}
-        {% endif %}
+        Showing {{ showing_from }}–{{ showing_to }}{% if total_count is not none %} of {{ total_count }}{% endif %}
       {% else %}
-        No Entries Registered
+        No bookmarks found
       {% endif %}
-    </h3>
+    </p>
   </div>
-  <p class="section-meta text-sm italic text-slate-500 font-serif">
-    {% if query %}
-      Query matches for "{{ query }}"
-    {% else %}
-      All cataloged records, 20 entries per page
-    {% endif %}
-  </p>
+  {% if query %}
+    <p style="font-size:0.8rem; color:var(--muted);">Results for "<strong style="color:var(--text);">{{ query }}</strong>"</p>
+  {% endif %}
 </div>
 
 {% include "partials/bookmark_cards.html" %}
 
-<div class="pagination-bar mt-8">
-  <div class="pagination-copy">
-    Page {{ current_page }}
-    {% if total_count is not none and total_count > 0 %}
-      of {{ ((total_count - 1) // per_page) + 1 }}
-    {% endif %}
-  </div>
-  <div class="flex items-center gap-3">
+<div class="pagination-bar">
+  <span class="pagination-copy">
+    Page {{ current_page }}{% if total_count is not none and total_count > 0 %} of {{ ((total_count - 1) // per_page) + 1 }}{% endif %}
+  </span>
+  <div style="display:flex; gap:0.6rem; align-items:center;">
     {% if has_prev_page %}
       <a class="button-secondary button-small" href="{{ prev_page_url }}">Previous</a>
     {% else %}
-      <span class="button-secondary button-small button-disabled">Previous</span>
+      <span class="button-secondary button-small" style="opacity:0.35; pointer-events:none;">Previous</span>
     {% endif %}
-
     {% if has_next_page %}
       <a class="button-primary button-small" href="{{ next_page_url }}">Next</a>
     {% else %}
-      <span class="button-secondary button-small button-disabled">Next</span>
+      <span class="button-secondary button-small" style="opacity:0.35; pointer-events:none;">Next</span>
     {% endif %}
   </div>
 </div>

@@ -2,62 +2,69 @@
 
 {% block content %}
   {% if message %}
-    <div class="alert-banner mb-6 px-4 py-3 text-sm">
-      {{ message }}
-    </div>
+    <div class="alert-banner">{{ message }}</div>
   {% endif %}
 
-  <section class="hero-panel">
-    <p class="eyebrow">The Adventurer's Archive</p>
-    <h2 class="hero-title mx-auto mt-4 max-w-4xl text-center">
-      A Database of Uncommon Knowledge & Saved Bookmarks
-    </h2>
-    <p class="hero-copy mx-auto mt-4 max-w-2xl text-center">
-      Search through your records, or perusal your latest bookmarks below. Designed for cataloging and quiet contemplation.
+  <!-- Hero -->
+  <section class="hero-section">
+    <p class="hero-eyebrow">Your personal X archive</p>
+    <h1 class="hero-title">
+      Rediscover what<br>you <em>saved</em>
+    </h1>
+    <p class="hero-subtitle">
+      Search, browse and organise every bookmark you've ever saved on X — all stored locally.
     </p>
 
-    <form action="/search" method="get" class="hero-search mx-auto mt-8 max-w-3xl">
+    <form action="/search" method="get" class="hero-search">
       <input
-        class="field field-search"
         type="search"
         name="q"
-        placeholder="Enter search query (topics, people, code snippets, notes)..."
+        placeholder="Search bookmarks, topics, authors…"
+        autocomplete="off"
       />
-      <button class="button-primary uppercase tracking-wider" type="submit">Search</button>
+      <button type="submit">Search</button>
     </form>
 
-    <div class="stats-ribbon mx-auto mt-8 max-w-4xl">
-      <div class="metric-card">
-        <span class="metric-label">Total Records</span>
-        <span class="metric-value">{{ stats.total_bookmarks }}</span>
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-item">
+        <span class="stat-value">{{ stats.total_bookmarks }}</span>
+        <span class="stat-label">Total bookmarks</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">New This Week</span>
-        <span class="metric-value">{{ stats.new_this_week }}</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">{{ stats.new_this_week }}</span>
+        <span class="stat-label">Added this week</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">Categories</span>
-        <span class="metric-value">{{ stats.category_count }}</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">{{ stats.category_count }}</span>
+        <span class="stat-label">Categories</span>
       </div>
-      <div class="metric-card">
-        <span class="metric-label">Last Sync Log</span>
-        <span class="metric-value metric-value-compact">{{ stats.last_sync_time or "Never" }}</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" style="font-size:1.1rem; font-family:'Inter',sans-serif; font-weight:600;">
+          {{ stats.last_sync_time or "Never" }}
+        </span>
+        <span class="stat-label">Last synced</span>
       </div>
     </div>
   </section>
 
-  <section class="mt-12">
-    <div class="section-heading mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+  <!-- Recent bookmarks -->
+  <section class="content-section" style="padding-top: 0;">
+    <div class="section-header">
       <div>
-        <p class="eyebrow">Recent Recordings</p>
-        <h3 class="section-title text-2xl uppercase tracking-wider">Ten catalog entries, ready for perusal</h3>
+        <p class="section-label">Recent</p>
+        <h2 class="section-title">Latest bookmarks</h2>
       </div>
-      <a href="/search" class="text-link">View Full Archive</a>
+      <a href="/search" class="text-link">View all</a>
     </div>
 
-    <form action="/" method="get" class="filter-ribbon mb-6">
-      <div class="ribbon-group">
-        <label class="ribbon-label" for="recent-category">Category</label>
+    <!-- Filters -->
+    <form action="/" method="get" class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label" for="recent-category">Category</label>
         <select class="field field-compact" id="recent-category" name="category">
           <option value="">All categories</option>
           {% for category, _ in category_counts %}
@@ -65,8 +72,8 @@
           {% endfor %}
         </select>
       </div>
-      <div class="ribbon-group">
-        <label class="ribbon-label" for="recent-media">Filter</label>
+      <div class="filter-group">
+        <label class="filter-label" for="recent-media">Media</label>
         <select class="field field-compact" id="recent-media" name="media">
           <option value="all" {% if recent_media == "all" %}selected{% endif %}>All media</option>
           <option value="images" {% if recent_media == "images" %}selected{% endif %}>Images</option>
@@ -74,12 +81,12 @@
           <option value="text" {% if recent_media == "text" %}selected{% endif %}>Text only</option>
         </select>
       </div>
-      <div class="ribbon-group">
-        <label class="ribbon-label" for="recent-sort">Sort</label>
+      <div class="filter-group">
+        <label class="filter-label" for="recent-sort">Sort</label>
         <select class="field field-compact" id="recent-sort" name="sort">
           <option value="newest" {% if recent_sort == "newest" %}selected{% endif %}>Newest first</option>
           <option value="oldest" {% if recent_sort == "oldest" %}selected{% endif %}>Oldest first</option>
-          <option value="author" {% if recent_sort == "author" %}selected{% endif %}>Author A-Z</option>
+          <option value="author" {% if recent_sort == "author" %}selected{% endif %}>Author A–Z</option>
         </select>
       </div>
       <button class="button-secondary button-small" type="submit">Apply</button>

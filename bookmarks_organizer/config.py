@@ -14,7 +14,7 @@ def _bool_env(name: str, default: bool) -> bool:
 
 @dataclass(slots=True)
 class Settings:
-    app_name: str = "Twitter/X Bookmarks Organizer"
+    app_name: str = "Recollect"
     project_root: Path = field(default_factory=lambda: Path(__file__).resolve().parents[1])
     data_dir: Path = field(init=False)
     database_path: Path = field(init=False)

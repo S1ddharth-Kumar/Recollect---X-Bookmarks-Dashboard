@@ -1,81 +1,98 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="mb-6 flex justify-start">
-    <a href="/search" class="text-link">← Return to General Catalog</a>
-  </div>
+  <section class="content-section" style="padding-top: 7rem;">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="/search" class="text-link" style="font-size:0.8rem;">← Back to bookmarks</a>
+    </div>
 
-  <section class="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-    <article class="section-panel">
-      <div class="flex flex-wrap items-center gap-3 mb-6">
-        <span class="tag">{{ tweet.category }}</span>
-        {% for tag in tweet.tags %}
-          <span class="tag tag-subtle">#{{ tag }}</span>
-        {% endfor %}
-      </div>
-      <div class="border-b border-[rgba(35,31,32,0.15)] pb-4 mb-6">
-        <h2 class="bookmark-author text-xl">{{ tweet.author }}</h2>
-        <span class="bookmark-handle block mt-1">{{ tweet.handle }}</span>
-      </div>
-      <p class="mt-6 text-xl leading-relaxed text-slate-900 font-serif italic">{{ tweet.text }}</p>
-      {% if tweet.image_urls %}
-        <div class="mt-8 grid gap-4 md:grid-cols-2">
-          {% for image_url in tweet.image_urls %}
-            <a href="{{ image_url }}" target="_blank" rel="noreferrer" class="block">
-              <img class="media-card" src="{{ image_url }}" alt="Tweet image" loading="lazy" />
-            </a>
+    <div class="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <!-- Main card (polaroid light theme) -->
+      <article class="bookmark-card" style="padding: 2rem;">
+        <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1.25rem;">
+          <span class="tag">{{ tweet.category }}</span>
+          {% for tag in tweet.tags %}
+            <span class="tag tag-subtle">#{{ tag }}</span>
           {% endfor %}
         </div>
-      {% endif %}
-      {% if tweet.video_urls or tweet.video_poster_urls %}
-        <div class="mt-8 grid gap-4">
-          {% for video_url in tweet.video_urls %}
-            <video class="media-card" controls preload="metadata">
-              <source src="{{ video_url }}" />
-            </video>
-          {% endfor %}
-          {% for poster_url in tweet.video_poster_urls %}
-            <a href="{{ tweet.url }}" target="_blank" rel="noreferrer" class="block">
-              <img class="media-card" src="{{ poster_url }}" alt="Tweet video preview" loading="lazy" />
-            </a>
-          {% endfor %}
-        </div>
-      {% endif %}
-      <div class="mt-8 pt-6 border-t border-[rgba(35,31,32,0.15)] flex flex-wrap gap-4 text-sm">
-        <a class="button-primary button-small uppercase tracking-wider" href="{{ tweet.url }}" target="_blank" rel="noreferrer">Open on X</a>
-        <span class="nav-pill font-mono">Tweet ID {{ tweet.tweet_id }}</span>
-      </div>
-    </article>
 
-    <aside class="space-y-6">
-      <div class="panel">
-        <h3 class="panel-title">Add to collection</h3>
-        <div class="space-y-3">
-          {% for collection in collections %}
-            <form action="/collections/{{ collection.collection_id }}/items" method="post">
-              <input type="hidden" name="tweet_id" value="{{ tweet.tweet_id }}" />
-              <button class="button-secondary w-full text-left" type="submit">{{ collection.name }}</button>
-            </form>
-          {% else %}
-            <p class="text-sm text-slate-600">Create a collection from the dashboard first.</p>
-          {% endfor %}
+        <div style="border-bottom:1px solid var(--card-line); padding-bottom:1rem; margin-bottom:1.25rem;">
+          <p class="bookmark-author" style="font-size:1rem;">{{ tweet.author }}</p>
+          <span class="bookmark-handle">{{ tweet.handle }}</span>
         </div>
-      </div>
 
-      <div class="panel">
-        <h3 class="panel-title">Related Records</h3>
-        <div class="space-y-4">
-          {% for item in similar %}
-            <a class="block border border-[#231f20] bg-white px-4 py-4 shadow-[3px_3px_0px_#231f20] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#231f20] transition-all" href="/bookmarks/{{ item.tweet.tweet_id }}">
-              <p class="bookmark-author text-xs">{{ item.tweet.author }}</p>
-              <p class="mt-2 text-sm text-slate-800 font-serif italic">{{ item.tweet.text[:140] }}{% if item.tweet.text|length > 140 %}...{% endif %}</p>
-              <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.1em] text-amber-800">{{ "%.3f"|format(item.score) }} Similarity Index</p>
-            </a>
-          {% else %}
-            <p class="text-sm italic text-slate-500 font-serif">Similar catalog records will appear once more bookmarks are indexed.</p>
-          {% endfor %}
+        <p style="font-size:1.05rem; line-height:1.75; color:var(--card-text); margin-bottom:1.5rem;">
+          {{ tweet.text }}
+        </p>
+
+        {% if tweet.image_urls %}
+          <div style="display:grid; gap:0.75rem; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); margin-bottom:1.25rem;">
+            {% for image_url in tweet.image_urls %}
+              <a href="{{ image_url }}" target="_blank" rel="noreferrer">
+                <img class="media-card" src="{{ image_url }}" alt="Bookmark image" loading="lazy" />
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if tweet.video_urls or tweet.video_poster_urls %}
+          <div style="display:grid; gap:0.75rem; margin-bottom:1.25rem;">
+            {% for video_url in tweet.video_urls %}
+              <video class="media-card" controls preload="metadata">
+                <source src="{{ video_url }}" />
+              </video>
+            {% endfor %}
+            {% for poster_url in tweet.video_poster_urls %}
+              <a href="{{ tweet.url }}" target="_blank" rel="noreferrer">
+                <img class="media-card" src="{{ poster_url }}" alt="Video preview" loading="lazy" />
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center; padding-top:1rem; border-top:1px solid var(--card-line); margin-top:auto;">
+          <a class="button-primary button-small" href="{{ tweet.url }}" target="_blank" rel="noreferrer">Open on X</a>
+          <span style="font-family:'Courier New',monospace; font-size:0.72rem; color:var(--card-muted);">ID {{ tweet.tweet_id }}</span>
         </div>
-      </div>
-    </aside>
+      </article>
+
+      <!-- Sidebar -->
+      <aside style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="panel">
+          <h3 class="panel-title">Add to collection</h3>
+          <div style="display:flex; flex-direction:column; gap:0.6rem;">
+            {% for collection in collections %}
+              <form action="/collections/{{ collection.collection_id }}/items" method="post">
+                <input type="hidden" name="tweet_id" value="{{ tweet.tweet_id }}" />
+                <button class="button-secondary w-full" type="submit" style="width:100%; text-align:left;">{{ collection.name }}</button>
+              </form>
+            {% else %}
+              <p style="font-size:0.82rem; color:var(--muted);">No collections yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Related bookmarks</h3>
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            {% for item in similar %}
+              <a href="/bookmarks/{{ item.tweet.tweet_id }}" style="display:block; text-decoration:none;">
+                <div class="bookmark-card" style="padding:0.9rem;">
+                  <p class="bookmark-author" style="font-size:0.78rem;">{{ item.tweet.author }}</p>
+                  <p style="margin-top:0.4rem; font-size:0.82rem; color:var(--card-text); line-height:1.55;">
+                    {{ item.tweet.text[:130] }}{% if item.tweet.text|length > 130 %}…{% endif %}
+                  </p>
+                  <p style="margin-top:0.5rem; font-family:'Courier New',monospace; font-size:0.65rem; color:var(--card-muted);">
+                    {{ "%.3f"|format(item.score) }} similarity
+                  </p>
+                </div>
+              </a>
+            {% else %}
+              <p style="font-size:0.82rem; color:var(--muted);">Similar bookmarks will appear once more are indexed.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </aside>
+    </div>
   </section>
 {% endblock %}

@@ -1,57 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <section class="section-panel">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p class="eyebrow">The General Catalog</p>
-        <h2 class="mt-2 text-3xl uppercase tracking-wider text-slate-900">Peruse the Complete Collection</h2>
+  <section class="content-section" style="padding-top: 7rem;">
+    <div class="section-panel">
+      <div style="margin-bottom: 1.5rem;">
+        <p class="section-label">Search</p>
+        <h1 class="section-title">All bookmarks</h1>
+        {% if query %}
+          <p style="font-size:0.85rem; color:var(--muted); margin-top:0.4rem;">
+            Results for "<strong style="color:var(--text);">{{ query }}</strong>"
+          </p>
+        {% endif %}
       </div>
-      <p class="max-w-xl text-sm italic text-slate-600 font-serif">
-        Narrow your exploration by entering a specific query, or sort through the archive using the filter drawer below.
-      </p>
-    </div>
 
-    <form class="mt-8 space-y-4" action="/search" method="get">
-      <input type="hidden" name="mode" value="{{ mode }}" />
-      <div class="search-row">
-        <input class="field field-search" type="search" name="q" value="{{ query }}" placeholder="Search bookmarks, authors, topics, links..." />
-        <button class="button-primary uppercase tracking-wider" type="submit">Search</button>
-      </div>
-      <div class="filter-ribbon">
-        <div class="ribbon-group">
-          <label class="ribbon-label" for="library-category">Category</label>
-          <select class="field field-compact" id="library-category" name="category">
-            <option value="">All categories</option>
-            {% for category, _ in category_counts %}
-              <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
-            {% endfor %}
-          </select>
+      <form class="space-y-4" action="/search" method="get">
+        <input type="hidden" name="mode" value="{{ mode }}" />
+        <div class="hero-search" style="border-radius:6px; max-width:100%;">
+          <input
+            class="field-search"
+            type="search"
+            name="q"
+            value="{{ query }}"
+            placeholder="Search bookmarks, authors, topics, links…"
+            style="border-radius:6px;"
+          />
+          <button type="submit" style="border-radius:6px; margin:3px;">Search</button>
         </div>
-        <div class="ribbon-group">
-          <label class="ribbon-label" for="library-media">Filter</label>
-          <select class="field field-compact" id="library-media" name="media">
-            <option value="all" {% if selected_media == "all" %}selected{% endif %}>All media</option>
-            <option value="images" {% if selected_media == "images" %}selected{% endif %}>Images</option>
-            <option value="video" {% if selected_media == "video" %}selected{% endif %}>Video</option>
-            <option value="text" {% if selected_media == "text" %}selected{% endif %}>Text only</option>
-          </select>
+
+        <div class="filter-bar" style="margin-bottom:0;">
+          <div class="filter-group">
+            <label class="filter-label" for="library-category">Category</label>
+            <select class="field field-compact" id="library-category" name="category">
+              <option value="">All categories</option>
+              {% for category, _ in category_counts %}
+                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="library-media">Media</label>
+            <select class="field field-compact" id="library-media" name="media">
+              <option value="all" {% if selected_media == "all" %}selected{% endif %}>All media</option>
+              <option value="images" {% if selected_media == "images" %}selected{% endif %}>Images</option>
+              <option value="video" {% if selected_media == "video" %}selected{% endif %}>Video</option>
+              <option value="text" {% if selected_media == "text" %}selected{% endif %}>Text only</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="library-sort">Sort</label>
+            <select class="field field-compact" id="library-sort" name="sort">
+              <option value="relevance" {% if selected_sort == "relevance" %}selected{% endif %}>Best match</option>
+              <option value="newest" {% if selected_sort == "newest" %}selected{% endif %}>Newest first</option>
+              <option value="oldest" {% if selected_sort == "oldest" %}selected{% endif %}>Oldest first</option>
+              <option value="author" {% if selected_sort == "author" %}selected{% endif %}>Author A–Z</option>
+            </select>
+          </div>
+          <button class="button-secondary button-small" type="submit">Apply</button>
         </div>
-        <div class="ribbon-group">
-          <label class="ribbon-label" for="library-sort">Sort</label>
-          <select class="field field-compact" id="library-sort" name="sort">
-            <option value="relevance" {% if selected_sort == "relevance" %}selected{% endif %}>Best match</option>
-            <option value="newest" {% if selected_sort == "newest" %}selected{% endif %}>Newest first</option>
-            <option value="oldest" {% if selected_sort == "oldest" %}selected{% endif %}>Oldest first</option>
-            <option value="author" {% if selected_sort == "author" %}selected{% endif %}>Author A-Z</option>
-          </select>
-        </div>
-        <button class="button-secondary button-small uppercase tracking-wider" type="submit">Apply</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </section>
 
-  <section id="results" class="mt-8">
+  <section id="results" class="content-section" style="padding-top:0;">
     {% include "partials/bookmark_list.html" %}
   </section>
 {% endblock %}

@@ -3,37 +3,66 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ app_name }}</title>
+    <title>Recollect — Your X bookmarks, organised</title>
+    <meta name="description" content="Recollect is a local-first dashboard for exploring, searching and organising your X / Twitter bookmarks." />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Montserrat:wght@500;700;800;900&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}" />
   </head>
-  <body class="app-body min-h-screen text-slate-900">
-    <div class="page-shell">
-      <header class="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-6 pt-10 pb-8 text-center">
-        <div class="brand-lockup flex flex-col items-center">
-          <a href="/" class="brand-kicker">THE ADVENTURER'S BOOKMARK DATABASE</a>
-          <h1 class="mt-2 text-3xl font-extrabold uppercase tracking-[0.18em] text-slate-900">{{ app_name }}</h1>
-        </div>
-        <div class="header-divider w-28 h-[1.5px] bg-[#231f20] my-2"></div>
-        <nav class="flex items-center gap-4 text-xs font-semibold tracking-wider uppercase">
-          <a class="nav-pill {% if request.url.path == '/' %}nav-pill-active{% endif %}" href="/">Home</a>
-          <a class="nav-pill {% if request.url.path == '/search' %}nav-pill-active{% endif %}" href="/search">All Bookmarks</a>
-          <form action="/sync" method="post" class="inline m-0">
-            <button class="button-primary button-small uppercase tracking-wider" type="submit">Run Sync</button>
-          </form>
-        </nav>
-      </header>
+  <body class="app-body">
 
-      <main class="mx-auto w-full max-w-7xl px-6 pb-16">
+    <!-- Scrolling code-rain background -->
+    <div class="code-rain-layer" id="codeRain" aria-hidden="true"></div>
+
+    <!-- Floating pill nav -->
+    <nav class="pill-nav" role="navigation" aria-label="Main navigation">
+      <a href="/" class="pill-brand">Recollect</a>
+      <div class="pill-links">
+        <a class="pill-link {% if request.url.path == '/' %}pill-link-active{% endif %}" href="/">Home</a>
+        <a class="pill-link {% if request.url.path == '/search' %}pill-link-active{% endif %}" href="/search">Bookmarks</a>
+        <form action="/sync" method="post" class="inline m-0">
+          <button class="pill-action" type="submit">Sync</button>
+        </form>
+      </div>
+    </nav>
+
+    <div class="page-shell">
+      <main>
         {% block content %}{% endblock %}
       </main>
     </div>
+
+    <script>
+      // Generate a simple scrolling random-character rain effect
+      (function () {
+        const el = document.getElementById('codeRain');
+        if (!el) return;
+        const chars = '0123456789abcdefABCDEF#@$%&x0';
+        const cols = Math.floor(window.innerWidth / 9);
+        const rows = 28;
+        let lines = Array.from({ length: rows }, () =>
+          Array.from({ length: cols }, () => chars[Math.floor(Math.random() * chars.length)]).join(' ')
+        );
+        function render() {
+          el.textContent = lines.join('\n');
+        }
+        function tick() {
+          // shift lines up and add a new random line at bottom
+          lines.shift();
+          lines.push(
+            Array.from({ length: cols }, () => chars[Math.floor(Math.random() * chars.length)]).join(' ')
+          );
+          render();
+        }
+        render();
+        setInterval(tick, 120);
+      })();
+    </script>
   </body>
 </html>
